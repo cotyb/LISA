@@ -16,7 +16,7 @@ for file in files:
             print file
             print flow
         if flow[0]["match"].has_key("nw_src"):
-            print >> fw,"src_ip:{0}, dst_ip:{1}, in_port:{2}, actions:{3}".format(flow[0]["match"]["nw_src"],\
+            print >> fw,"{\"src_ip\":\"%s\", \"dst_ip\":\"%s\", \"in_port\":\"%s\", \"actions\":\"%s\"}" %(flow[0]["match"]["nw_src"],\
                                             flow[0]["match"]["nw_dst"], flow[0]["match"]["in_port"], flow[0]["actions"])
     fp.close()
     fw.close()
