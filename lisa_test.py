@@ -126,8 +126,9 @@ class Lisa_Tester():
             for rule in self.sw_flows[sw]:
                 tmp_forward_flows.append(rule["src_ip"][0])
             num_original_forward_rule = len(tmp_forward_flows)
-            if sw_count.has_key(sw):
-                count_flow = [(rule[1], rule[2]) for rule in sw_count[sw]]
+            if not sw_count.has_key(sw):
+                continue
+            count_flow = [(rule[1], rule[2]) for rule in sw_count[sw]]
                 #print count_flow
             for count_rule in count_flow:
                 tmp_add_flow = []
@@ -175,11 +176,15 @@ class Lisa_Tester():
             #print handle_sw_count
             tmp_sw_count = copy.deepcopy(handle_sw_count)
             min_num_total_rules = before_num
+            if not tmp_sw_count.has_key(sw):
+                continue
             count_rules = tmp_sw_count[sw]
             for count_rule in count_rules:
                 if count_rule[0]:
                     reside_sw = sw
                     for along_sw in count_rule[3]:
+                        if not tmp_sw_count.has_key(along_sw):
+                            continue
                         tmp_sw_count[along_sw].append(count_rule)
                         tmp_sw_count[sw].remove(count_rule)
                         self.statistics(tmp_sw_count)
@@ -193,7 +198,7 @@ class Lisa_Tester():
                     tmp_sw_count[sw].remove(count_rule)
                     tmp_sw_count[reside_sw].append(count_rule)
                     tmp_sw_count[reside_sw][-1][0] = False
-                    #print "after %s moves, the total rules in all switches are %s" %(self.move, min_num_total_rules)
+                    print "after %s moves, the total rules in all switches are %s" %(self.move, min_num_total_rules)
                     handle_sw_count = tmp_sw_count
                     self.move += 1
         return before_num, min_num_total_rules
