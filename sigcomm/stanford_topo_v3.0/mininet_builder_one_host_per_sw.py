@@ -69,9 +69,10 @@ class StanfordTopo( Topo ):
         #host_id = len(switches) + 1
         for s in switches:
             host_id = s
-            port = 1
+            port = list(ports[s])[0]
             self.addHost( "h%s" % host_id )
             self.addLink( "h%s" % host_id, "s%s" % s, 0, port )
+            #host_id += 1
             # Edge ports
             '''
             for port in ports[s]:
