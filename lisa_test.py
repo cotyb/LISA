@@ -183,7 +183,7 @@ class Lisa_Tester():
                 if count_rule[0]:
                     reside_sw = sw
                     for along_sw in count_rule[3]:
-                        if not tmp_sw_count.has_key(along_sw):
+                        if not tmp_sw_count.has_key(along_sw) or along_sw == sw:
                             continue
                         tmp_sw_count[along_sw].append(count_rule)
                         tmp_sw_count[sw].remove(count_rule)
@@ -195,19 +195,22 @@ class Lisa_Tester():
                         if tmp_num_rules < min_num_total_rules:
                             min_num_total_rules = tmp_num_rules
                             reside_sw = along_sw
+                            print "after %s moves, the total rules in all switches are %s" %(self.move, min_num_total_rules)
+                            self.move += 1
                     tmp_sw_count[sw].remove(count_rule)
                     tmp_sw_count[reside_sw].append(count_rule)
                     tmp_sw_count[reside_sw][-1][0] = False
-                    print "after %s moves, the total rules in all switches are %s" %(self.move, min_num_total_rules)
                     handle_sw_count = tmp_sw_count
-                    self.move += 1
+
+        print handle_sw_count
         return before_num, min_num_total_rules
 
 
 if __name__ == '__main__':
     wfile = open("statistics","a")
     #print >> wfile, "path   count   init_num    min_num steps   time"
-    count = [50, 100, 150, 200]
+    #count = [50, 100, 150, 200]
+    count = [100]
     for count_number in count:
         lisa_tester = Lisa_Tester()
         lisa_tester.distribute_host()
@@ -217,7 +220,8 @@ if __name__ == '__main__':
         lisa_tester.statistics(lisa_tester.sw_count)
         st = time.time()
         init_num, min_num = lisa_tester.core_algorithm(count_number)
+        #init_num, min_num = lisa_tester.core_algorithm(count_number)
         st1 = time.time()
         steps = lisa_tester.move
-        print >> wfile, 240, count_number, init_num, min_num, steps, st1-st
+        #print >> wfile, 240, count_number, init_num, min_num, steps, st1-st
 
