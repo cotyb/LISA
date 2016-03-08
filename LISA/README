@@ -1,0 +1,6 @@
+This system includes three main subsystems:
+1. ryu patch: which inside in the ryu controller, transfer from the language to IR
+2. IR: decouple, element the conflicts, compress the numbers of rules, which is language- and rule-independent
+3. ovs patch: transfer from the IR to the low level rules
+
+If there's no specific intent from the user, then we must choose a policy to control the switches.
