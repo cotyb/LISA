@@ -696,7 +696,7 @@ class Shortest_Route(app_manager.RyuApp):
                     flag = False
                     break
             if flag == True:
-                # get the port of path[-1]
+            # get the port of path[-1]
                 switch_array = []
                 dst_port = None
                 for key in self.access_table.keys():
@@ -718,16 +718,6 @@ class Shortest_Route(app_manager.RyuApp):
                     #    " PATH[%s --> %s]:%s\n" % (ip_src, ip_dst, path))
                     # self.logger.info("LISA_PATH[%s --> %s]:%s\n" % (ip_src, ip_dst, full_path))
             return include_loop, dof
-
-
-
-
-
-
-
-
-
-
 
 
 
