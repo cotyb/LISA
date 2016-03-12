@@ -907,6 +907,7 @@ class Shortest_Route(app_manager.RyuApp):
 
             if dst_location:
                 dst_sw = dst_location[0]
+            print src_sw, dst_sw
             #result = self.dijkstra(self.graph, src_sw)
             if src_sw and dst_sw:
                 result = nx.shortest_path(self.G, src_sw, dst_sw)

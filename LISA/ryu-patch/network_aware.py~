@@ -116,7 +116,7 @@ class Network_Aware(app_manager.RyuApp):
                 elif (src, dst) in link_list:
                     self.graph[src][dst] = 1
                     self.G.add_edge(src, dst)
-                    # self.G.add_edge(dst, src)
+                    self.G.add_edge(dst, src)
                 else:
                     self.graph[src][dst] = float('inf')
         return self.graph
