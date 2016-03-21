@@ -37,12 +37,15 @@ class Shortest_Route(app_manager.RyuApp):
     _CONTEXTS = {
         "Network_Aware": network_aware.Network_Aware,
         "Network_Monitor": network_monitor.Network_Monitor,
+        # "Middle_End": IR.middle_end.Middle_End,
     }
 
     def __init__(self, *args, **kwargs):
         super(Shortest_Route, self).__init__(*args, **kwargs)
         self.network_aware = kwargs["Network_Aware"]
         self.network_monitor = kwargs["Network_Monitor"]
+        # self.middle_end = kwargs["Middle_End"]
+        self.middle_end = IR.middle_end
         self.mac_to_port = {}
         self.datapaths = {}
 	
@@ -907,7 +910,6 @@ class Shortest_Route(app_manager.RyuApp):
 
             if dst_location:
                 dst_sw = dst_location[0]
-            print src_sw, dst_sw
             #result = self.dijkstra(self.graph, src_sw)
             if src_sw and dst_sw:
                 result = nx.shortest_path(self.G, src_sw, dst_sw)
@@ -926,6 +928,8 @@ class Shortest_Route(app_manager.RyuApp):
                 has_loop, dof = self.has_loop(switch_dof, full_path, ip_dst)
                 if has_loop:
                     raise Exception("please assign other cri nodes and links")
+                print dof
+                self.middle_end.Middle_End(dof, full_path)
 		
 
 

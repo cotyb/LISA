@@ -69,8 +69,8 @@ class Middle_End():
       instruction_sets = []
       scope_sets = []
       sw_sets = []
-      dst_ip_lower = ip2long(switch_dof[-1][-1].split(' ')[1]) 
-      dst_ip_upper = ip2long(switch_dof[-1][-1].split(' ')[1]) 
+      dst_ip_lower = ip2long(full_path[-1][-1]) 
+      dst_ip_upper = ip2long(full_path[-1][-1]) 
       dst_ip = RangeItem(dst_ip_lower, dst_ip_upper)
 
       for switch in switch_dof:
