@@ -53,7 +53,8 @@ class LisaTopo( Topo ):
        
 def LisaTopoTest():
     topo = LisaTopo()
-    net = Mininet( topo=topo, switch=OVSKernelSwitch)
+    main_controller = lambda a:RemoteController(a, ip="localhost", port=6633)
+    net = Mininet( topo=topo, switch=OVSKernelSwitch, controller=main_controller)
     
     
     net.start()
