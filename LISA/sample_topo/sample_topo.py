@@ -80,17 +80,7 @@ def LisaTopoTest( controller_ip, controller_port,  controller_num ):
         s.start(controller_list)
     
     net.start()
-    '''
-    # These switches should be set to a local controller..
-    # dummy_switches = topo.dummy_switches
-    main_controller = lambda a: RemoteController(a, ip=controller_ip, port=controller_port)
-    main_controller = net.addController(name='main_controller', controller=main_controller)
-    main_controller.start()
 
-    dummyClass = lambda a: RemoteController( a, ip=dummy_controller_ip, port=dummy_controller_port)
-    dummy_controller = net.addController( name='dummy_controller', controller=dummyClass)
-    dummy_controller.start()
-    '''
         
     CLI( net )
     net.stop()
@@ -109,14 +99,6 @@ if __name__ == '__main__':
     parser.add_argument("-p", dest="controller_port",type=int,
                       default=6633,
                       help="Controller's port")
-    '''
-    parser.add_argument("-c2", dest="dummy_controller_name",
-                      default="localhost",
-                      help="Dummy controller's hostname or IP")
-    parser.add_argument("-p2", dest="dummy_controller_port",type=int,
-                      default=6634,
-                      help="Dummy ontroller's port")
-    '''
     parser.add_argument("-num", dest="controller_number",type=int,
                       default=2,
                       help="the number of the controller")
