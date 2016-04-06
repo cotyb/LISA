@@ -732,15 +732,6 @@ class Shortest_Route(app_manager.RyuApp):
 
 
 
-
-
-
-
-
-
-
-
-
     def get_host_location(self, host_ip):
         for key in self.access_table:
             if self.access_table[key] == host_ip:
@@ -931,7 +922,16 @@ class Shortest_Route(app_manager.RyuApp):
                 if has_loop:
                     raise Exception("please assign other cri nodes and links")
                 print dof
-                self.middle_end.Middle_End(dof, full_path)
+                # using our IR module
+                dof_full_path = (dof, full_path)
+                if dof_full_path not in self.middle_end.multi_dof:
+                    self.middle_end.multi_dof.append(dof_full_path)
+
+
+
+
+                # without our IR module
+                self.middle_end.Middle_End()
 		
 
 

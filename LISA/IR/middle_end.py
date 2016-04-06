@@ -36,51 +36,75 @@ from inst import *
 from networks import *
 from lisa_types import *
 from util.utils import *
+from ryu.lib import hub
+
+global multi_dof
+multi_dof = []
+
 
 class Middle_End():
 
-    def __init__(self, switch_dof, full_path):
+    def __init__(self):
       '''
+      for lisa
       switch_dof: like this, [[sw1, port1, dof], [sw2, port2, dof] ...]
       full_path: a list contains the switch from sw1 to swn, like this, [sw1, sw2, sw3, ..., swn]
       '''
-      self.switch_dof = switch_dof
-      self.full_path = full_path
       self.names = ['switch', 'dst_ip']
 
+      #      global multi_dof
+      # multi_dof = []
+      self.now_multi_dof = []
+
+      self.collect_dof = hub.spawn(self._collect)
+
+    # collet multi dof from all controllers
+    def _collect(self):
+      i = 0
+      while True:
+        self.eliminate_conflict()
+        if i == 1:
+          self.update_multi_dof()
+          i = 0
+        hub.sleep(10)
+        i += 1
+
+    # update the dof from controllers every 10ms
+    def update_multi_dof(self):
+      self.now_multi_dof = multi_dof
+      print self.now_multi_dof
 
 
-      instruction_sets, scope_sets = self.construct_instructions(self.switch_dof, full_path)    
-      self.eliminate_conflict(instruction_sets, scope_sets)
-
-
-    def eliminate_conflict(self, instruction_sets, scope_sets):
+    # eliminate conflict every 10ms 
+    def eliminate_conflict(self):
+      instruction_sets, scope_sets = self.construct_instructions(self.now_multi_dof)    
       if self.scope_ovserlap_test(scope_sets) and self.instruction_conflict_test(instruction_sets):
         priority_dict = self.instruction_decouple_test(instruction_sets)
         inst_sets = self.instruction_set_test(priority_dict)
-        self.elimination_test(inst_sets)
+        self.elimination_test(inst_sets)      
 
 
-
-      
-
-
-    def construct_instructions(self, switch_dof, full_path):
+    def construct_instructions(self, now_multi_dof):
       instruction_sets = []
       scope_sets = []
       sw_sets = []
-      dst_ip_lower = ip2long(switch_dof[-1][-1].split(' ')[1]) 
-      dst_ip_upper = ip2long(switch_dof[-1][-1].split(' ')[1]) 
-      dst_ip = RangeItem(dst_ip_lower, dst_ip_upper)
-
-      for switch in switch_dof:
-        tmp_sw = DotItem(switch[0])
-        sw_sets.append(tmp_sw)
-        tmp_scope = Scope(self.names, [tmp_sw, dst_ip])
-        scope_sets.append(tmp_scope)
-        tmp_constraint = Constraint(['fwd_port'], [switch[1]])
-        tmp_annotation = Annotation([('FORBID', switch[0]),(switch[-1])])
-        instruction_sets.append(tmp_annotation)
+      for controller_dof in now_multi_dof:
+        switch_dof, full_path = controller_dof[0], controller_dof[1]
+        dst_ip_lower = ip2long(switch_dof[-1][-1].split(' ')[1]) 
+        dst_ip_upper = ip2long(switch_dof[-1][-1].split(' ')[1]) 
+        dst_ip = RangeItem(dst_ip_lower, dst_ip_upper)
+        for switch in switch_dof:
+          tmp_sw = DotItem(switch[0])
+          if tmp_sw not in sw_sets:
+            sw_sets.append(tmp_sw)
+          tmp_scope = Scope(self.names, [tmp_sw, dst_ip])
+          if tmp_scope not in scope_sets:
+            scope_sets.append(tmp_scope)
+          tmp_constraint = Constraint(['fwd_port'], [switch[1]])
+          tmp_annotation = Annotation([('FORBID', switch[0]),(switch[-1].split(' ')[0], switch[-1].split(' ')[1])])
+          tmp_instruction = Instruction(tmp_scope, tmp_constraint, tmp_annotation)
+          if tmp_instruction not in instruction_sets:
+            instruction_sets.append(tmp_instruction)
       return instruction_sets, scope_sets
 
     def scope_ovserlap_test(self, scope_set):
@@ -234,4 +258,7 @@ class Middle_End():
           inst.dump()
     
     
+    
+
+
     
