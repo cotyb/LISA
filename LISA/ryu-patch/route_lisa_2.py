@@ -48,6 +48,8 @@ class Shortest_Route(app_manager.RyuApp):
         self.middle_end = IR.middle_end
         self.mac_to_port = {}
         self.datapaths = {}
+        self.multi_dof = []
+        self.f = open("controller_dof_2","w")
 	
 	self.test_count = 0
 	#self.f = open("result1.txt","w")
@@ -933,17 +935,15 @@ class Shortest_Route(app_manager.RyuApp):
 
                 # using our IR module
                 dof_full_path = (dof, full_path)
-                if dof_full_path not in self.middle_end.multi_dof:
-                    self.middle_end.multi_dof.append(dof_full_path)
-
-
-
+                print self.multi_dof, dof_full_path
+                if dof_full_path not in self.multi_dof:
+                    self.f = open("controller_dof_2","w")
+                    self.multi_dof.append(dof_full_path)
+                    print >> self.f, dof_full_path
+                    self.f.close()
 
                 # without our IR module
-                # self.middle_end.Middle_End(dof, full_path)
-
-
-		
+                # self.middle_end.Middle_End(dof, full_path)		
 
 
                 flow_info = (eth_type, ip_src, ip_dst, in_port)

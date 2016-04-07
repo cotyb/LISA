@@ -38,9 +38,6 @@ from lisa_types import *
 from util.utils import *
 from ryu.lib import hub
 
-global multi_dof
-multi_dof = []
-
 
 class Middle_End():
 
@@ -55,8 +52,10 @@ class Middle_End():
       #      global multi_dof
       # multi_dof = []
       self.now_multi_dof = []
-
       self.collect_dof = hub.spawn(self._collect)
+      self.f1 = open("controller_dof_1","r")
+      self.f2 = open("controller_dof_2","r")
+
 
     # collet multi dof from all controllers
     def _collect(self):
@@ -71,8 +70,37 @@ class Middle_End():
 
     # update the dof from controllers every 10ms
     def update_multi_dof(self):
+      multi_dof = self.get_dof_from_files()
       self.now_multi_dof = multi_dof
       print self.now_multi_dof
+
+    def get_dof_from_files(self):
+      multi_dof = []
+      dof_1 = []
+      dof_2 = []
+      self.f1 = open("controller_dof_1","r")
+      self.f2 = open("controller_dof_2","r")
+      f1_content = self.f1.readlines()
+      f2_content = self.f2.readlines()
+      if f1_content:
+          # print f1_content
+          # print f1_content[0]
+          # print "self.f1.readlines()"
+          # print self.f1.readlines()
+          dof_1 = f1_content[0]
+      if f2_content:
+          # print self.f2.readlines()
+          dof_2 = f2_content[0]
+      c_dof_1 = eval(dof_1)
+      self.f1.close()
+      self.f2.close()
+      if c_dof_1 not in multi_dof:
+        multi_dof.append(c_dof_1)
+      c_dof_2 = eval(dof_2)
+      if c_dof_2 not in multi_dof:
+        multi_dof.append(c_dof_2)
+      print multi_dof
+      return multi_dof
 
 
     # eliminate conflict every 10ms 
