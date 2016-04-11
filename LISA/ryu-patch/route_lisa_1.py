@@ -16,10 +16,12 @@ from ryu.lib.packet import packet
 from ryu.lib.packet import ethernet
 from ryu.lib.packet import ipv4
 from ryu.lib.packet import arp
+from ryu.lib import hub
 
 import sys
 sys.path.append("..")
 import IR.middle_end
+import IR.networks as IRn
 
 import networkx as nx
 
@@ -60,7 +62,8 @@ class Shortest_Route(app_manager.RyuApp):
         self.total_switches = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,1000,1001,1002,1003,1004,1005,1006,1007,1008,1009]
         # links   :(src_dpid,dst_dpid)->(src_port,dst_port)
         self.link_to_port = self.network_aware.link_to_port
-	print self.link_to_port
+        self.switch_port_table = self.network_aware.switch_port_table
+
         # {sw :[host1_ip,host2_ip,host3_ip,host4_ip]}
         self.access_table = self.network_aware.access_table
 
@@ -71,7 +74,40 @@ class Shortest_Route(app_manager.RyuApp):
         self.lisa_graph = self.graph
 
         self.G = self.network_aware.G
+        self.transfer_topology_information_to_IR_thread = hub.spawn(self._transfer_topo_to_IR)
         
+    
+
+    '''
+    set the topology in IR, transfer the topology information to the IR 
+    '''
+    def _transfer_topo_to_IR(self):
+        i = 0
+        self.set_IR_topo()
+        while True:
+            if i == 10:
+                self.set_IR_topo()
+                i = 0
+            hub.sleep(2)
+            i += 1
+
+    def set_IR_topo(self):
+        print "hh"
+        for sw_port in self.switch_port_table.items():
+            sid = sw_port[0]
+            ports_list = sw_port[1]
+            IR_switch = IRn.Switch(sid, ports_list)
+            IRn.switches[sid] = IR_switch
+        print IRn.switches
+
+        for switch_pair, port_pair in self.link_to_port.items():
+            IRn.add_double_link(IRn.switches[switch_pair[0]].ports[port_pair[0]], \
+                IRn.switches[switch_pair[1]].ports[port_pair[1]])
+
+        for edge_ports in self.access_table:
+            IRn.add_edge_ports(IRn.switches[edge_ports[0]].ports[edge_ports[1]])
+
+
 
 
 

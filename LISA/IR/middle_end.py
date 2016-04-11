@@ -38,7 +38,6 @@ from lisa_types import *
 from util.utils import *
 from ryu.lib import hub
 
-
 class Middle_End():
 
     def __init__(self):
@@ -76,8 +75,8 @@ class Middle_End():
 
     def get_dof_from_files(self):
       multi_dof = []
-      dof_1 = []
-      dof_2 = []
+      dof_1 = ' '
+      dof_2 = ' '
       self.f1 = open("controller_dof_1","r")
       self.f2 = open("controller_dof_2","r")
       f1_content = self.f1.readlines()
@@ -106,7 +105,7 @@ class Middle_End():
     # eliminate conflict every 10ms 
     def eliminate_conflict(self):
       instruction_sets, scope_sets = self.construct_instructions(self.now_multi_dof)    
-      if self.scope_ovserlap_test(scope_sets) and self.instruction_conflict_test(instruction_sets):
+      if self.instruction_conflict_test(instruction_sets):
         priority_dict = self.instruction_decouple_test(instruction_sets)
         inst_sets = self.instruction_set_test(priority_dict)
         self.elimination_test(inst_sets)      
@@ -136,6 +135,7 @@ class Middle_End():
       return instruction_sets, scope_sets
 
     def scope_ovserlap_test(self, scope_set):
+        flag = False
         print '################scope overlapping test################'
         '''
         scope1 = Scope(names, [sw_1, dst_ip])
@@ -153,12 +153,15 @@ class Middle_End():
             if scope_set[i].overlaps(scope_set[j]):
               # conflicting_scope = scope_set[i].decouples_scope(scope_set[j])
               # conflicting_scope.dump()
-              return True
+              flag = True
               break
-        return False
+          if flag == True:
+            break
+        return flag
 
 
     def instruction_conflict_test(self, instruction_set):
+        flag = False
         print '################instruction conflicting test################'
         '''
         # A DstIP 10.0.0.2 FORWARD 2
@@ -185,9 +188,11 @@ class Middle_End():
               # n_1, n_2 = instruction_set[i].decouples(instruction_set[j])
               # n_1.dump()
               # n_2.dump()
-              return True
+              flag = True
               break
-        return False
+          if flag == True:
+            break
+        return flag
 
     def instruction_decouple_test(self, instruction_set):
         print '################instruction decouple test################'

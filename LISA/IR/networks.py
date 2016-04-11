@@ -4,6 +4,7 @@
 """
 Definitions of basic network properties. 
 """
+
 switch_factor = 10000
 
 edge_ports = []
@@ -28,10 +29,12 @@ class Switch:
   sid = -1
   ports = {}
 
-  def __init__(self, s, max_port):
+  def __init__(self, s, ports_list):
     self.sid = s
     self.ports = {}
-    for i in range(1, max_port+1): self.ports[i] = Port(i, self.sid)
+    for i in ports_list:
+      self.ports[i] = Port(i, self.sid)
+    # for i in range(1, max_port+1): self.ports[i] = Port(i, self.sid)
 
   def __eq__(self, rhs):
     return self.sid == rhs.sid
@@ -59,7 +62,7 @@ class Switch:
 
 def set_networks():
   pass
-
+  
 def add_double_link(p1, p2):
   topology[p1] = p2
   topology[p2] = p1
