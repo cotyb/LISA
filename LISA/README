@@ -4,3 +4,9 @@ This system includes three main subsystems:
 3. ovs patch: transfer from the IR to the low level rules
 
 If there's no specific intent from the user, then we must choose a policy to control the switches.
+
+
+the softwares' versions you need to run this system
+ryu：optional(at least 4.4.2 is ok)
+mininet: 2.2.0
+openvswitch: 2.4.0
