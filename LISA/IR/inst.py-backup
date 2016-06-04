@@ -7,8 +7,6 @@ Definition of general instructions in LISA
 from itertools import *
 
 from networks import *
-import time
-
 
 class Scope:
   scope_dict = {}
@@ -247,23 +245,14 @@ class InstSet:
     for inst in self.insts:
       inst.annotation.anno = dofs
 
-  '''
   def eliminates(self, extra_dof = None):
-    print "-------------------------------insts--------------------------------------------------"
-    for inst in self.insts:
-        print inst.scope.scope_dict, inst.constraint.action_dict, inst.annotation.anno
-    if extra_dof:
-    print "************************extro_dof************************************"
-        print extra_dof.anno
-    tmp_path = []
     flag = True
-    # for inst in self.insts: 
-    #  if inst != self.insts[0]:
-    #    flag = False
-    # if flag: return True, []
+    for inst in self.insts: 
+      if inst != self.insts[0]:
+        flag = False
+    if flag: return True
 
     art_sw = switches[self.get_scope().get_attr('switch').items]
-    tmp_path.append(art_sw.sid)
     connected_sw = art_sw.get_connected_sw()
     # print 'art_sw', art_sw.sid
     # art_sw.dump()
@@ -290,13 +279,6 @@ class InstSet:
     # for i in dof_map.items():
     #   print i[0], i[1]
     # print 'end'
-    count1, count2 = 0, 0
-    if dof_map.has_key("FORWARD"):
-        count1 = len(dof_map["FORWARD"])
-    if dof_map.has_key("TOWARDS"):
-        count2 = len(dof_map["TOWARDS"])
-    if len(self.insts) == 1 and count1 + count2  <= 3:
-        return True, []
 
     if 'FORBID' in dof_map.keys():
       for forbid in dof_map['FORBID']:
@@ -307,20 +289,14 @@ class InstSet:
         for c in connected_sw:
           if forbid[1] == c[1]: connected_sw.remove(c)
         # if forbid_port in connected_sw: connected_sw.remove(forbid_port)
-    for sw in connected_sw:
-        print sw[0]
 
     if 'FORWARD' in dof_map.keys():
       # print dof_map['FORWARD']
       for forward in dof_map['FORWARD']:
-        print "forward is:"
-        print forward
         fwd_port = (forward[1], art_sw.sid)
-        print "fwd_port", fwd_port
-        tmp_path.append(forward[1].sid)
         if Port(fwd_port[0], fwd_port[1]) in edge_ports: 
-          return True, tmp_path
-        elif fwd_port in connected_sw:
+          return True
+        elif fwd_port in connected_sw: 
           connected_sw = [fwd_port]
         else: 
           return False
@@ -335,34 +311,19 @@ class InstSet:
           if final_result: break
           pid = sw[0]
           sid = sw[1]
-          tmp_path.append(sid)
           candidate_inst_sets = switch_set_map[sid]
           # check the inst set from high priority ones to lower
-          # for inst_set in candidate_inst_sets:
-          #    for instru in inst_set.insts:
-          #        print instru.scope.scope_dict, instru.constraint.action_dict, instru.annotation.anno
           for inst_set in candidate_inst_sets:
             if inst_set.get_scope().includes(self.get_scope(), exception = 'switch'):
-              tmp_path.append(inst_set.get_scope().get_attr("switch").items)
               next_dof = Annotation(dof_map['FORBID']+dof_map['TOWARDS'])
-              print "-------------------------before remove---------------------------"
-              print next_dof.anno
-              print pid
-              pid = str(pid)
               next_dof.remove(('TOWARDS', pid))
-              print "--------------------------after remove---------------------------"
-              print next_dof.anno
-              final_result = inst_set.eliminates(next_dof)[0]
-              tmp_path = tmp_path + inst_set.eliminates(next_dof)[1]
-              if not final_result:
-                tmp_path.pop()
+              final_result = inst_set.eliminates(next_dof)
               if final_result:
                 self.assign_action('fwd_port', pid)
                 new_dofs = []
                 for dof in dof_map.values(): new_dofs += dof
                 self.assign_dofs(new_dofs)
                 # self.insts[0].annotation.dump()
-            tmp_path.pop()
 
     if ('TOWARDS' not in dof_map.keys() or len(dof_map['TOWARDS']) == 0) and \
        not final_result and len(connected_sw) != 0:
@@ -370,150 +331,4 @@ class InstSet:
       self.assign_action('fwd_port', connected_sw[0][0])
       self.assign_dofs(dof_map['FORBID']+dof_map['TOWARDS'])
 
-    return final_result, tmp_path
-    '''
-
-  def eliminates(self, extra_dof = None):
-    print "$$$$$$$$$$$$$$$$$$$$$$$$you are in %s switch $$$$$$$$$$$$$$$$$ " %(self.get_scope().get_attr('switch').items)
-    print "-------------------------------insts--------------------------------------------------"
-    for inst in self.insts:
-        print inst.scope.scope_dict, inst.constraint.action_dict, inst.annotation.anno
-    before_node_sw = []
-    if extra_dof:
-        print "**************************************extra_dof****************************"
-        print extra_dof.anno
-        for dof in extra_dof.anno:
-          if dof[0] == 'TOWARDS':
-            before_node_sw.append(int(dof[1]))
-    tmp_path = []
-    flag = True
-    # for inst in self.insts: 
-    #  if inst != self.insts[0]:
-    #    flag = False
-    # if flag: return True, []
-
-    art_sw = switches[self.get_scope().get_attr('switch').items]
-    tmp_path.append(art_sw.sid)
-    connected_sw = art_sw.get_connected_sw()
-    # print 'art_sw', art_sw.sid
-    # art_sw.dump()
-
-    # print 'art_insts'
-    # for inst in self.insts:
-    #   inst.dump()
-    # print 'end'
-
-    art_dof = Annotation([])
-    for a in [inst.annotation for inst in self.insts]:
-      art_dof.intersects(a)
-    if extra_dof != None: art_dof.intersects(extra_dof)
-
-    # print 'art_dof'
-    # print art_dof.anno
-    # print 'end'
-    dof_map = {}
-    for d, k in groupby(art_dof.anno, lambda a: a[0]):
-      if d not in dof_map.keys(): dof_map[d] = []
-      dof_map[d].extend(list(k))
-
-    # print 'dof_dump'
-    # for i in dof_map.items():
-    #   print i[0], i[1]
-    # print 'end'
-    count1, count2 = 0, 0
-    if dof_map.has_key("FORWARD"):
-        count1 = len(dof_map["FORWARD"])
-    if dof_map.has_key("TOWARDS"):
-        count2 = len(dof_map["TOWARDS"])
-    if len(self.insts) == 1 and count2  <= 1:
-        return True, [switches[self.get_scope().get_attr('switch').items].sid]
-
-    if 'FORBID' in dof_map.keys():
-      for forbid in dof_map['FORBID']:
-        # print forbid
-        # forbid_port = (forbid[1], art_sw.sid)
-        # print forbid_port
-        # print connected_sw
-        for c in connected_sw:
-          if forbid[1] == c[1]: connected_sw.remove(c)
-        # if forbid_port in connected_sw: connected_sw.remove(forbid_port)
-    for sw in connected_sw:
-        print sw[1]
-
-    if 'FORWARD' in dof_map.keys():
-      # print dof_map['FORWARD']
-      for forward in dof_map['FORWARD']:
-        print "forward is:"
-        print forward
-        fwd_port = (forward[1], art_sw.sid)
-        print "fwd_port", fwd_port
-        tmp_path.append(forward[1].sid)
-        if Port(fwd_port[0], fwd_port[1]) in edge_ports: 
-          return True, tmp_path
-        elif fwd_port in connected_sw:
-          connected_sw = [fwd_port]
-        else: 
-          return False
-    
-    print "before_change_connecte_sw"
-    for sw in connected_sw:
-      print sw[1]
-    final_result = False
-    if 'TOWARDS' in dof_map.keys():
-      for towards in dof_map['TOWARDS']:
-        if final_result: break
-        if before_node_sw:
-          for i in range(len(before_node_sw)):
-            for j in range(len(connected_sw)):
-              if before_node_sw[i] == connected_sw[j][1]:
-                if j < len(connected_sw) - 1:
-                  connected_sw = [connected_sw[j]] + connected_sw[0:j] + connected_sw[j+1:]
-                else:
-                  connected_sw = [connected_sw[j]] + connected_sw[0:j]
-        print "connected_switch"
-        for sw in connected_sw:
-          print sw[1]
-        for sw in connected_sw:
-          # print 'current connected'
-          # print connected_sw
-          if final_result: break
-          pid = sw[0]
-          sid = sw[1]
-          print "sid is %sid" %sid
-          # tmp_path.append(sid)
-          candidate_inst_sets = switch_set_map[sid]
-          # check the inst set from high priority ones to lower
-          # for inst_set in candidate_inst_sets:
-          #    for instru in inst_set.insts:
-          #        print instru.scope.scope_dict, instru.constraint.action_dict, instru.annotation.anno
-          for inst_set in candidate_inst_sets:
-            if inst_set.get_scope().includes(self.get_scope(), exception = 'switch'):
-              # tmp_path.append(inst_set.get_scope().get_attr("switch").items)
-              next_dof = Annotation(dof_map['FORBID']+dof_map['TOWARDS'])
-              sid = str(sid)
-              next_dof.remove(('TOWARDS', sid))
-              final_result, tmp_p = inst_set.eliminates(next_dof)
-              tmp_path += tmp_p
-              if not final_result:
-                tmp_path.pop()
-              if final_result:
-                self.assign_action('fwd_port', pid)
-                new_dofs = []
-                for dof in dof_map.values(): new_dofs += dof
-                self.assign_dofs(new_dofs)
-                break
-                # self.insts[0].annotation.dump()
-          if final_result:
-            break
-          # tmp_path.pop()
-
-    if ('TOWARDS' not in dof_map.keys() or len(dof_map['TOWARDS']) == 0) and \
-       not final_result and len(connected_sw) != 0:
-      final_result = True
-      self.assign_action('fwd_port', connected_sw[0][0])
-      self.assign_dofs(dof_map['FORBID']+dof_map['TOWARDS'])
-
-    return final_result, tmp_path
-
-
-
+    return final_result

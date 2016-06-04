@@ -37,7 +37,6 @@ from networks import *
 from lisa_types import *
 from util.utils import *
 from ryu.lib import hub
-import time
 
 class Middle_End():
 
@@ -106,17 +105,8 @@ class Middle_End():
     # eliminate conflict every 10ms 
     def eliminate_conflict(self):
       instruction_sets, scope_sets = self.construct_instructions(self.now_multi_dof)    
-      print '------------------------------instruction_sets----------------------------------'
-      print instruction_sets
-      for instru in instruction_sets:
-        print instru.scope.scope_dict, instru.constraint.action_dict, instru.annotation.anno
       if self.instruction_conflict_test(instruction_sets):
         priority_dict = self.instruction_decouple_test(instruction_sets)
-        print "--------------------------priority_dict---------------------------"
-        for key, value in priority_dict.items():
-          print key, value
-          for inst in value:
-            print key, inst.scope.scope_dict, inst.constraint.action_dict, inst.annotation.anno
         inst_sets = self.instruction_set_test(priority_dict)
         self.elimination_test(inst_sets)      
 
@@ -216,7 +206,7 @@ class Middle_End():
             break
           else:
             for t in combinations(priority_dict[art_pri], 2):
-              if t[0].conflicts(t[1]) and not t[0].scope == t[1].scope:
+              if t[0].conflicts(t[1]) and t[0].scope != t[1].scope:
                 n_1, n_2 = t[0].decouples(t[1])
                 if art_pri+1 not in priority_dict.keys(): priority_dict[art_pri+1] = []
                 priority_dict[art_pri+1].extend([n_1, n_2])
@@ -283,25 +273,25 @@ class Middle_End():
         for s in switches.values():
           s.dump()
 
+
     def elimination_test(self, inst_sets):
         print '################elimination test################'
         
         for set in inst_sets:
           print set.size()
           if set.size() > 1:
-            for instruction in set.insts:
-                print instruction.scope.scope_dict, instruction.constraint.action_dict, instruction.annotation.anno
             print 'ready to eliminate'
-            print set.eliminates()
-            has_eliminated, path = set.eliminates()
-            if has_eliminated:
+            if set.eliminates():
               print 'successful elimination'
-              print "the path is"
-              print path
             else:
               print 'cannot eliminated'
         
         for set in inst_sets:
           inst = set.insts[0]
           inst.dump()
+    
+    
+    
+
+
     
