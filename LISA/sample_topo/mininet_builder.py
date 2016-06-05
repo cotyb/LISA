@@ -169,7 +169,7 @@ def StanfordTopoTest( controller_ip, controller_port, controller_num ):
     topo = StanfordTopo()
 
     # main_controller = lambda a: RemoteController( a, ip=controller_ip, port=controller_port)
-    net = StanfordMininet( topo=topo, switch=OVSKernelSwitch, controller=main_controller)
+    net = StanfordMininet( topo=topo, switch=OVSKernelSwitch, controller=None)
     controller_list = []
     for i in range(controller_num):
         name= "c%s" %i
@@ -177,7 +177,7 @@ def StanfordTopoTest( controller_ip, controller_port, controller_num ):
         controller_list.append(c)
 
     for dpid in topo.dummy_switches:
-        s = net.net.nameToNode["s%s" % dpid]
+        s = net.nameToNode["s%s" % dpid]
         s.start(controller_list)
     
     net.start()

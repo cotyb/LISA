@@ -1,4 +1,9 @@
-This version has been verified in 4 switches
+This version has been verified in 26 switches
+and the graph in sample_topo explains the path:
+the switches in orange circle are critical nodes
+the black path is a original path
+the red path is a original path
+the brown is the result path
 
 if you want to use this system, we recommand you:
 ryu：optional(at least 4.4.2 is ok)

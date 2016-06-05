@@ -481,7 +481,10 @@ class InstSet:
           sid = sw[1]
           print "sid is %sid" %sid
           # tmp_path.append(sid)
-          candidate_inst_sets = switch_set_map[sid]
+          if switch_set_map.has_key(sid):
+            candidate_inst_sets = switch_set_map[sid]
+          else:
+            continue
           # check the inst set from high priority ones to lower
           # for inst_set in candidate_inst_sets:
           #    for instru in inst_set.insts:

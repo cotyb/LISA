@@ -189,7 +189,7 @@ class Network_Aware(app_manager.RyuApp):
 	links_list = get_link(self.topology_api_app, None)
 	links = [(link.src.dpid,link.dst.dpid,{'port':link.src.port_no}) for link in links_list] 
 	#print links  
-	if len(self.switches) == 4:
+	if len(self.switches) == 26:
             #self.switches = self.switch_port_table.keys()
             #links = get_link(self.topology_api_app, None)
 	    self.create_port_map(switch_list)

@@ -921,7 +921,7 @@ class Shortest_Route(app_manager.RyuApp):
             #print self.graph
 
             # information = [{1:1}, {2:(1000, 3),(10, 1)}, {1:1005}]	    
-            information = [{1:3}]
+            information = [{1:2}]
             if result:
                 path = result
                 #path = result[1][src_sw][dst_sw]
